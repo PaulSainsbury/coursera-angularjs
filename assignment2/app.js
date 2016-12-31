@@ -4,108 +4,59 @@
   angular.module('shoppingList', [])
   .controller('ToBuyController', ToBuyController)
   .controller('AlreadyBoughtController', AlreadyBoughtController)
-  .factory('ItemListFactory', ItemListFactory);
+  .service('ShoppingListCheckOffService', ShoppingListCheckOffService);
 
-  ToBuyController.$inject = ['$scope', 'ItemListFactory'];
-  function ToBuyController ($scope, ItemListFactory) {
+  ToBuyController.$inject = ['$scope', 'ShoppingListCheckOffService'];
+  function ToBuyController ($scope, ShoppingListCheckOffService) {
     var toBuy = this;
-
-    var itemsToBuy = [
-      { name: "Cookies", qty: "5 bags"},
-      { name: "Cookies", qty: "4 bags"},
-      { name: "Cookies", qty: "3 bags"},
-      { name: "Cookies", qty: "2 bags"},
-      { name: "Cookies", qty: "1 bags"},
-      { name: "Chips", qty: "10 bags"},
-      { name: "Chips", qty: "9 bags"},
-      { name: "Chips", qty: "8 bags"},
-      { name: "Chips", qty: "7 bags"},
-      { name: "Chips", qty: "6 bags"},
-      { name: "Chips", qty: "5 bags"}
-    ];
-    var itemList = ItemListFactory.getToBuyItems(itemsToBuy),
-      boughtList = ItemListFactory.getAlreadyBoughtItems();
 
 
     toBuy.buyItem = function (itemIndex) {
-      console.log(itemIndex)
-      try {
-        var item = toBuy.items[itemIndex];
-        console.log(item);
-        boughtList.addItem(item.name, item.qty);
-        itemList.removeItem(itemIndex);
-
-        toBuy.message = "";
-      } catch (error) {
-        toBuy.message = error.message;
-      }
+      ShoppingListCheckOffService.buyItem(itemIndex);
     }
-
-    toBuy.items = itemList.getItems();
+    toBuy.items = ShoppingListCheckOffService.getToBuyItems();
+    toBuy.message = "Everything is bought!"
   }
 
-  AlreadyBoughtController.$inject = ['$scope', 'ItemListFactory'];
-  function AlreadyBoughtController ($scope, ItemListFactory) {
+  AlreadyBoughtController.$inject = ['$scope', 'ShoppingListCheckOffService'];
+  function AlreadyBoughtController ($scope, ShoppingListCheckOffService) {
     var alreadyBought = this;
 
-    var itemList = ItemListFactory.getAlreadyBoughtItems();
-    alreadyBought.message = itemList.emptyMessage;
-
-    alreadyBought.buyItem = function (itemIndex) {
-      try {
-        itemList.addItem(itemIndex);
-        alreadyBought.message = "";
-      } catch (error) {
-        alreadyBought.message = error.message;
-      }
-    }
-
-    alreadyBought.items = itemList.getItems();
+    alreadyBought.items = ShoppingListCheckOffService.getAlreadyBoughtItems();
+    alreadyBought.message = "Nothing bought yet!";
   }
 
-  function ItemListService(initialItems) {
+  function ShoppingListCheckOffService() {
     var service = this;
 
     // List of shopping items
-    var items = initialItems || [];
+    var itemsToBuy = [
+          { name: "Cookies", qty: "5 bags"},
+          { name: "Cookies", qty: "4 bags"},
+          { name: "Cookies", qty: "3 bags"},
+          { name: "Cookies", qty: "2 bags"},
+          { name: "Cookies", qty: "1 bags"},
+          { name: "Chips", qty: "10 bags"},
+          { name: "Chips", qty: "9 bags"},
+          { name: "Chips", qty: "8 bags"},
+          { name: "Chips", qty: "7 bags"},
+          { name: "Chips", qty: "6 bags"},
+          { name: "Chips", qty: "5 bags"}
+        ],
+      itemsBought = [];
 
-    service.addItem = function (itemName, quantity) {
-      var item = {
-        name: itemName,
-        qty: quantity
-      };
-      items.push(item);
+    service.buyItem = function (itemIndex){
+      var item = itemsToBuy[itemIndex];
+      itemsToBuy.splice(itemIndex,1);
+      itemsBought.push(item);
     };
 
-    service.removeItem = function (itemIndex) {
-      items.splice(itemIndex, 1);
-      if (items.length == 0) {
-        throw new Error(this.emptyMessage)
-      }
+    service.getToBuyItems = function () {
+      return itemsToBuy;
     };
-
-    service.getItems = function () {
-      return items;
+    service.getAlreadyBoughtItems = function () {
+      return itemsBought;
     };
   }
-
-  function ItemListFactory() {
-    var toBuyList, alreadyBoughtList;
-    var factory = {
-      getToBuyItems : function (initialItems) {
-        toBuyList = toBuyList || new ItemListService(initialItems);
-        toBuyList.emptyMessage = 'Everything is bought!'
-        return toBuyList;
-      },
-      getAlreadyBoughtItems : function () {
-        alreadyBoughtList = alreadyBoughtList || new ItemListService(null);
-        alreadyBoughtList.emptyMessage = 'Nothing bought yet'
-        return alreadyBoughtList;
-      }
-    };
-
-    return factory;
-  }
-
 
 })();
