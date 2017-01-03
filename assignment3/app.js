@@ -24,8 +24,6 @@
   }
 
   function FoundItemsDirectiveController() {
-    var list = this;
-    console.log('this', list);
   }
 
 
@@ -39,7 +37,6 @@
     narrowDown.searchForItems = function () {
       MenuSearchService.getMatchedMenuItems(narrowDown.searchTerm).then(function(result){
         narrowDown.found = result;
-        console.log(result);
       });
     }
 
