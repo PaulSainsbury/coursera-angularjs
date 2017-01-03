@@ -58,6 +58,9 @@
         // process result and only keep items that match
         var foundItems = [];
         var menu_items = result.data.menu_items;
+        if (searchTerm == '') {
+          return foundItems;
+        }
 
         for(var i = 0; i < menu_items.length; i++) {
           var item = menu_items[i];
